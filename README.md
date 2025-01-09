@@ -30,11 +30,11 @@
   `webhookUrl` strings.
 
   ```javascript
-  await client.sAdd("eventName", ["https://demo.m.pipedream.net"]);
+  await client.sAdd("upload_image", ["https://demo.m.pipedream.net"]);
   ```
 
-- When a call to the event trigger endpoint is made, the route service function retrieves the set of corresponding URLs mapped to the event's name.
-- The producer creates unique messages for each of those URLs, each containing the event name, the URL, and a message ID.
-- A consumer picks up the message and parses it to get the event name, the URL, and the message ID.
-- It then makes a network request (using fetch or axios) to the URL.
-- If the network request fails, it requeues the message.
+- When a call to the event trigger endpoint is made, the route service function
+  retrieves the set of corresponding URLs mapped to the event's name, and enqueues it for processsing.
+- The queue is configured to handle retries with exponential delays. This ensures idempotency.
+- A worker picks up the message and parses it to get the event name and the
+  URL. It then makes a network request (using fetch or axios) to the URL.
