@@ -2,24 +2,13 @@ import express, { Request, Response, NextFunction } from "express";
 import { createClient } from "redis";
 import cors from "cors";
 
+import { setupRedis } from "@/utils";
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 let redis: ReturnType<typeof createClient>;
-
-async function setupRedis() {
-  try {
-    const client = createClient();
-    client.on("error", (err) => console.error("Redis Client Error:", err));
-    await client.connect();
-    console.log("Redis client connected");
-    return client;
-  } catch (error) {
-    console.error("Failed to connect to Redis:", error);
-    process.exit(1);
-  }
-}
 
 async function main() {
   try {
