@@ -5,7 +5,7 @@ import webhookRouter from "./webhook-routes";
 
 const router = Router();
 
-router.use("/api/v0/trigger-event", eventRouter);
-router.use("/api/v0/webhooks", webhookRouter);
+router.use("/v0/trigger-event", eventRouter);
+router.use("/v0/webhooks", webhookRouter);
 
 export default router;

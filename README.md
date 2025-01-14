@@ -34,7 +34,14 @@
   ```
 
 - When a call to the event trigger endpoint is made, the route service function
-  retrieves the set of corresponding URLs mapped to the event's name, and enqueues it for processsing.
-- The BullMQ queue is configured to handle retries with exponential delays. This ensures idempotency.
-- A worker picks up the message and parses it to get the event name and the
-  URL. It then makes a network request (using fetch or axios) to the URL.
+  retrieves the set of corresponding URLs mapped to the event's name, and
+  enqueues it for processsing.
+- The BullMQ queue is configured to handle retries with exponential delays. This
+  ensures idempotency.
+- A worker picks up the message and parses it to get the event name and the URL.
+  It then makes a network request (using fetch or axios) to the URL.
+
+## Running Locally
+
+- Configure the .env file and start the Redis server. It is recommended to run
+  Redis on a port other than the default.

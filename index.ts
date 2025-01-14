@@ -1,14 +1,18 @@
-import express, { Request, Response, NextFunction } from "express";
+import express from "express";
 import { createClient } from "redis";
 import cors from "cors";
 
 import { setupRedis } from "@/utils";
+import { errorHandler } from "./utils/error";
+import router from "./routes";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use("/api", router);
+app.use(errorHandler);
 
-let redis: ReturnType<typeof createClient>;
+export let redis: ReturnType<typeof createClient>;
 
 async function main() {
   try {

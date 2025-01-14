@@ -1,12 +1,34 @@
 import { Request, Response, NextFunction } from "express";
 
+import { HttpError } from "@/utils/error";
+import {
+  registerWebhookService,
+  getWebhookByEventNameService,
+  getAllWebhooksService,
+} from "@/services/webhook-services";
+
+const validUrlFormat = new RegExp(
+  /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi
+);
+
 export const postWebhookController = async (
   req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    res.status(200).json();
+    const { event_name, webhook_url } = req.body;
+
+    if (!event_name || !webhook_url || !webhook_url.match(validUrlFormat)) {
+      throw new HttpError("Invalid event name or URL", 400);
+    }
+
+    await registerWebhookService(event_name, webhook_url);
+    console.log(
+      `Registered webhook for event ${event_name} and URL ${webhook_url}`
+    );
+
+    res.status(200).json({ eventName: event_name, webhookUrl: webhook_url });
   } catch (error) {
     next(error);
   }
@@ -27,12 +49,14 @@ export const getWebhooksController = async (
       : 0;
 
     if (event_name) {
-      res.status(200).json();
+      const retrievedWebhooks = await getWebhookByEventNameService(event_name);
+      res.status(200).json(retrievedWebhooks);
       return;
     }
 
     if (!isNaN(page_size) && !isNaN(offset)) {
-      res.status(200).json();
+      const retrievedWebhooks = await getAllWebhooksService(page_size, offset);
+      res.status(200).json(retrievedWebhooks);
       return;
     }
 
