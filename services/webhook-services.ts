@@ -23,7 +23,7 @@ export async function getWebhookByEventNameService(event_name: string) {
 
 export async function getAllWebhooksService(page_size: number, offset: number) {
   try {
-    let webhooks = {};
+    let webhooks = [];
     let cursor = offset;
 
     do {
@@ -34,7 +34,10 @@ export async function getAllWebhooksService(page_size: number, offset: number) {
 
       cursor = res.cursor;
       for (const key of res.keys) {
-        webhooks[key] = await redis.sMembers(key);
+        webhooks.push({
+          eventName: key,
+          webhookUrls: await redis.sMembers(key),
+        });
       }
     } while (cursor !== 0 && Object.keys(webhooks).length < page_size);
 
