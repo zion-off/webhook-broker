@@ -6,10 +6,8 @@ import {
   getWebhookByEventNameService,
   getAllWebhooksService,
 } from "@/services/webhook-services";
+import { EventRequestType } from "@/utils/types";
 
-const validUrlFormat = new RegExp(
-  /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/gi
-);
 
 export const postWebhookController = async (
   req: Request,
@@ -17,18 +15,14 @@ export const postWebhookController = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { event_name, webhook_url } = req.body;
+    const { eventName, webhookUrl }: EventRequestType = req.body;
 
-    if (!event_name || !webhook_url || !webhook_url.match(validUrlFormat)) {
-      throw new HttpError("Invalid event name or URL", 400);
-    }
-
-    await registerWebhookService(event_name, webhook_url);
+    await registerWebhookService(eventName, webhookUrl);
     console.log(
-      `Registered webhook for event ${event_name} and URL ${webhook_url}`
+      `Registered webhook for event ${eventName} and URL ${webhookUrl}`
     );
 
-    res.status(200).json({ eventName: event_name, webhookUrl: webhook_url });
+    res.status(200).json({ eventName: eventName, webhookUrl: webhookUrl });
   } catch (error) {
     next(error);
   }
@@ -40,7 +34,7 @@ export const getWebhooksController = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const event_name = req.params.event_name;
+    const eventName = req.params.eventName;
     const page_size = req.query.page_size
       ? parseInt(req.query.page_size as string, 10)
       : 10;
@@ -48,8 +42,8 @@ export const getWebhooksController = async (
       ? parseInt(req.query.offset as string, 10)
       : 0;
 
-    if (event_name) {
-      const retrievedWebhooks = await getWebhookByEventNameService(event_name);
+    if (eventName) {
+      const retrievedWebhooks = await getWebhookByEventNameService(eventName);
       res.status(200).json(retrievedWebhooks);
       return;
     }
