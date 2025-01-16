@@ -1,19 +1,19 @@
 import { redis } from "..";
 import { HttpError } from "@/utils/error";
 
-export async function registerWebhookService(event_name: string, url: string) {
+export async function registerWebhookService(eventName: string, url: string) {
   try {
-    await redis.sAdd(event_name, url);
+    await redis.sAdd(eventName, url);
   } catch (error) {
     throw new HttpError("Failed to register webhook in Redis", 500);
   }
 }
 
-export async function getWebhookByEventNameService(event_name: string) {
+export async function getWebhookByEventNameService(eventName: string) {
   try {
-    const urls = await redis.sMembers(event_name);
+    const urls = await redis.sMembers(eventName);
     return {
-      eventName: event_name,
+      eventName: eventName,
       webhookUrls: urls,
     };
   } catch (error) {

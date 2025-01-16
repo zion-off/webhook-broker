@@ -21,7 +21,7 @@
   ```json
   {
     "eventName": "upload_image",
-    "webhook_url": "https://demo.m.pipedream.net"
+    "webhookUrl": "https://demo.m.pipedream.net"
   }
   ```
 
