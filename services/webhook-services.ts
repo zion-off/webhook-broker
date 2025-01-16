@@ -1,7 +1,8 @@
+import { EventResponseType } from "@/utils/types";
 import { redis } from "..";
 import { HttpError } from "@/utils/error";
 
-export async function registerWebhookService(eventName: string, url: string) {
+export async function registerWebhookService(eventName: string, url: string): Promise<void> {
   try {
     await redis.sAdd(eventName, url);
   } catch (error) {
@@ -9,13 +10,17 @@ export async function registerWebhookService(eventName: string, url: string) {
   }
 }
 
-export async function getWebhookByEventNameService(eventName: string) {
+export async function getWebhookByEventNameService(eventName: string): Promise<EventResponseType> {
   try {
-    const urls = await redis.sMembers(eventName);
-    return {
+    const urls: string[] = await redis.sMembers(eventName);
+    if (!urls || !urls.length) {
+      throw new Error();
+    }
+    const result: EventResponseType = {
       eventName: eventName,
-      webhookUrls: urls,
+      webhookUrls: urls as [string, ...string[]]
     };
+    return result;
   } catch (error) {
     throw new HttpError("Failed to get URLs from Redis", 500);
   }
