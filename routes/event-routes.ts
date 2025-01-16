@@ -1,9 +1,10 @@
 import express from "express";
 
-import { postEventController } from "@/controllers";
+import { postEventController , getEventStatsController } from "@/controllers";
 
 const eventRouter = express.Router();
 
-eventRouter.post("/", postEventController);
+eventRouter.get("/", getEventStatsController);
+eventRouter.post("/:eventName", postEventController);
 
 export default eventRouter;
