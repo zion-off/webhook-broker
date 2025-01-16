@@ -1,0 +1,41 @@
+services:
+  redis:
+    image: redis
+    container_name: wehbhook-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis-data:/var/lib/redis
+    networks:
+      - webhook
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 3
+      start_period: 5s
+      timeout: 5s
+
+  server:
+    build: 
+      context: ./
+    container_name: webhook-server
+    command: npm run start
+    volumes:
+      - ./:/app/
+    ports:
+      - "3000:3000"
+    networks:
+      - webhook
+    environment:
+      - PORT=3000
+      - REDIS_PORT=6380
+    depends_on:
+      redis:
+        condition: service_healthy
+
+networks:
+  webhook:
+    driver: bridge
+
+volumes:
+  redis-data:
