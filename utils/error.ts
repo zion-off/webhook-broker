@@ -8,7 +8,7 @@ export const errorHandler = (
 ) => {
   res
     .status(err.status || 500)
-    .json({ error: err.message || "Internal Server error" });
+    .json({ Error: err.message || "Internal Server error" });
 };
 
 export class HttpError extends Error {

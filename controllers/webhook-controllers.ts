@@ -2,9 +2,9 @@ import { Request, Response, NextFunction } from "express";
 
 import { HttpError } from "@/utils/error";
 import {
-  registerWebhookService,
-  getWebhookByEventNameService,
-  getAllWebhooksService,
+  registerWebhook,
+  getWebhookByEventName,
+  getAllWebhooks,
 } from "@/services/webhook-services";
 
 const validUrlFormat = new RegExp(
@@ -17,13 +17,17 @@ export const postWebhookController = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { event_name, webhook_url } = req.body;
+    const username = req.query.username;
+    if (!username) {
+      throw new HttpError("Invalid useraname", 403);
+    }
 
+    const { event_name, webhook_url } = req.body;
     if (!event_name || !webhook_url || !webhook_url.match(validUrlFormat)) {
       throw new HttpError("Invalid event name or URL", 400);
     }
 
-    await registerWebhookService(event_name, webhook_url);
+    await registerWebhook(username as string, event_name, webhook_url);
     console.log(
       `Registered webhook for event ${event_name} and URL ${webhook_url}`
     );
@@ -40,6 +44,11 @@ export const getWebhooksController = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    const username = req.query.username;
+    if (!username) {
+      throw new HttpError("Invalid useraname", 403);
+    }
+
     const event_name = req.params.event_name;
     const page_size = req.query.page_size
       ? parseInt(req.query.page_size as string, 10)
@@ -49,13 +58,13 @@ export const getWebhooksController = async (
       : 0;
 
     if (event_name) {
-      const retrievedWebhooks = await getWebhookByEventNameService(event_name);
+      const retrievedWebhooks = await getWebhookByEventName(username as string, event_name);
       res.status(200).json(retrievedWebhooks);
       return;
     }
 
     if (!isNaN(page_size) && !isNaN(offset)) {
-      const retrievedWebhooks = await getAllWebhooksService(page_size, offset);
+      const retrievedWebhooks = await getAllWebhooks(username as string, page_size, offset);
       res.status(200).json(retrievedWebhooks);
       return;
     }

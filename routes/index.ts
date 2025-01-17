@@ -1,10 +1,16 @@
 import { Router } from "express";
 
+import authRouter from "./auth-routes";
 import eventRouter from "./event-routes";
 import webhookRouter from "./webhook-routes";
 
 const router = Router();
 
+
+
+
+
+router.use("/v0/auth", authRouter);
 router.use("/v0/trigger-event", eventRouter);
 router.use("/v0/webhooks", webhookRouter);
 
