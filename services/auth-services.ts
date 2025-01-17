@@ -5,7 +5,7 @@ import { HttpError } from "@/utils";
 export async function registerUser(username: string, password: string) {
   try {
     if (await redis.exists(`user:${username}`)) {
-      throw new HttpError("User already exists!", 400);
+      throw new HttpError("User already exists", 400);
     }
     await redis.set(`user:${username}`, generateHash(password));
   } catch (error) {

@@ -7,9 +7,9 @@ export function generateHash(password: string) {
 export const signToken = (payload: string) => {
   return jwt.sign(
     {
-      payload,
+      username: payload,
     },
     process.env.AUTH_SECRET,
-    { expiresIn: process.env.JWT_AGE }
+    { expiresIn: parseInt(process.env.JWT_AGE, 10) }
   );
 };

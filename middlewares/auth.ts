@@ -20,15 +20,14 @@ export const authorizeUser = (
   res: Response,
   next: NextFunction
 ) => {
-  const bearerHeader: string | string[] = req.headers["Authorization"];
+  const bearerHeader: string = req.headers["authorization"];
   if (typeof bearerHeader !== "undefined") {
-    const bearer =
-      typeof bearerHeader === "string"
-        ? bearerHeader.split(" ")
-        : bearerHeader[0].split(" ");
+    const bearer = bearerHeader.split(" ");
     const bearerToken = bearer[1];
+    
     jwt.verify(bearerToken, process.env.AUTH_SECRET, (error, username) => {
       if (error) return res.status(403).json({ Error: error.message });
+      console.log(username);
       req.query.username = username;
       next();
     });
