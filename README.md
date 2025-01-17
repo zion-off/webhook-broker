@@ -8,6 +8,8 @@
 
 ## API Endpoints
 
+- `POST /api/v0/auth/register`
+- `POST /api/v0/auth/login`
 - `POST /api/v0/webhooks`
 - `GET /api/v0/webhooks?page_size=<page-size>&offset=<offset>`
 - `GET /api/v0/webhooks/<event-name>`
@@ -43,5 +45,11 @@
 
 ## Running Locally
 
-- Configure the .env file and start the Redis server. It is recommended to run
-  Redis on a port other than the default.
+- Run `npm install` to install dependencies.
+- Configure the .env file (see <a href=".env.example">.env.example</a>) and
+  start the server with `npm run start`. It is recommended to run Redis on a
+  port (`REDIS_PORT`) other than the default.
+- Register with a username and password. If registration is successful, the
+  response will include your bearer token.
+- Make requests to webhook and event endpoints with your bearer token in the
+  `Authorization` header.
