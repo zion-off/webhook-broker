@@ -6,6 +6,7 @@ import { setupRedis } from "@/utils";
 import { errorHandler } from "./utils/error";
 import router from "./routes";
 import '@/handlers/worker.js';
+import '@/handlers/events.js';
 
 const app = express();
 app.use(cors());
