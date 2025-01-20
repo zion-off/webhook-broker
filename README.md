@@ -45,3 +45,24 @@
 
 - Configure the .env file and start the Redis server. It is recommended to run
   Redis on a port other than the default.
+
+## Potential Failssafe Mechanisms
+
+The primary issue with relying solely on Redis is that, while it can be
+configured to be non-volatile, it is not ACID compliant. As such, if at any
+stage Redis fails, we stand the risk of losing information about requests that
+may not be sent later due to the data loss.
+
+To get around this, we can introduce a persistent database layer to log trigger
+workflow updates. When a request to trigger a webhook comes in, we write so in
+the database, along with a job ID. We then enqueue the job with the same ID in
+the BullMQ queue. When a worker pulls a job from the queue, we write appropriate
+logs before and after the event, and then again after the HTTP response is
+received from the webhook URL.
+
+A background task periodically checks the logs in the database for
+inconsistencies. For example, if a job is marked to have been picked up from the
+queue, but there is no information following this event, we can assume a Redis
+failure somewhere in between. This CRON job aggregates these failed jobs, and
+sends them to the retry queue for retrying, and it may use a cursor to keep
+track of jobs that have succeeded in a sequence.
