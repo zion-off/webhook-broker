@@ -51,18 +51,29 @@
 The primary issue with relying solely on Redis is that, while it can be
 configured to be non-volatile, it is not ACID compliant. As such, if at any
 stage Redis fails, we stand the risk of losing information about requests that
-may not be sent later due to the data loss.
+may not be sent later due to the data loss, or of making duplicate requests to
+clients. For example, if Redis fails to register a job as having been picked up
+by a worker, a different worker instance might pick up the same job and make the
+same request again to the client.
 
-To get around this, we can introduce a persistent database layer to log trigger
-workflow updates. When a request to trigger a webhook comes in, we write so in
-the database, along with a job ID. We then enqueue the job with the same ID in
-the BullMQ queue. When a worker pulls a job from the queue, we write appropriate
-logs before and after the event, and then again after the HTTP response is
-received from the webhook URL.
+To get around this, we can introduce a persistent database layer to log workflow
+updates when events are triggered. When a request to trigger a webhook comes in,
+we write so in the database, along with a unique job ID. a `uuid`, for example.
+We then enqueue the job with the same ID in the BullMQ queue. These two steps
+may be done in one database transaction, so that changes to the database can be
+rolled back if something goes wrong.
+
+When a worker pulls a job from the queue, we write appropriate logs before and
+after the event, and then again after the HTTP response is received from the
+client after making a request to the webhook URL. This way, the database stands
+as the single source of truth, and we may refer to it to spot inconsistencies in
+our workflow. This also enables us to flush Redis whenever necessary, or remove
+completed jobs from it to free up memory space, as they are not relevant to our
+workflow any longer.
 
 A background task periodically checks the logs in the database for
 inconsistencies. For example, if a job is marked to have been picked up from the
 queue, but there is no information following this event, we can assume a Redis
-failure somewhere in between. This CRON job aggregates these failed jobs, and
-sends them to the retry queue for retrying, and it may use a cursor to keep
-track of jobs that have succeeded in a sequence.
+failure somewhere in between, and decide to retry this job. This CRON job
+aggregates these failed jobs, and sends them to the retry queue for retrying,
+and it may use a cursor to keep track of jobs that have succeeded in a sequence.
