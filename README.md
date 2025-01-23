@@ -77,3 +77,13 @@ queue, but there is no information following this event, we can assume a Redis
 failure somewhere in between, and decide to retry this job. This CRON job
 aggregates these failed jobs, and sends them to the retry queue for retrying,
 and it may use a cursor to keep track of jobs that have succeeded in a sequence.
+
+To enhance security when validating the webhook broker, a public and private key 
+system can be implemented. The webhook broker will encrypt the payload using the 
+recipient's public key, ensuring that only the recipient can decrypt it using 
+their private key. Additionally, the recipient can verify the authenticity of the
+payload by validating the signature with the sender's public key.
+
+To further enhance security, we can implement key rotation practices, regularly
+updating our encryption keys to mitigate risks associated with potential key
+compromise or vulnerabilities in long-term key usage.
